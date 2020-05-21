@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# 方案一： https://arturbosch.github.io/detekt/git-pre-commit-hook.html
+# The shell script can be installed by copying the content over to
+# <<your-repo>>/.git/hooks/pre-commit.
+# This pre-commit hook needs to be executable,
+# so you may need to change the permission (chmod +x pre-commit).
+#
+# 方案二： https://stackoverflow.com/questions/427207/can-git-hook-scripts-be-managed-along-with-the-repository
+# 从git 2.9开始, 可以设置:core.hooksPath了.
+# 可以在repo里面添加一个目录hooks, 然后把git hooks文件放进去track.
+# 在命令行跑:
+# git config core.hooksPath [文件路径]
+# 把找hook文件的目录设置成指定目录就好了.
+
+echo "Running detekt check..."
+OUTPUT="/tmp/detekt-$(date +%s)"
+./gradlew detekt > $OUTPUT
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  cat $OUTPUT
+  rm $OUTPUT
+  echo "***********************************************"
+  echo "                 Detekt failed                 "
+  echo " Please fix the above issues before committing "
+  echo "***********************************************"
+  exit $EXIT_CODE
+fi
+rm $OUTPUT
